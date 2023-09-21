@@ -4,6 +4,8 @@ SPDX-License-Identifier: CC-BY-4.0
 This work is licensed under a Creative Commons Attribution 4.0 International License.
 */
 
+//Endereço do Contrato 0x2765AAF0CD47FB0FDB3461BaDe1aAA49b69cc162 
+
 pragma solidity 0.8.19;
 
 // OpenZeppelin Contracts v4.4.1 (token/ERC20/IERC20.sol)
