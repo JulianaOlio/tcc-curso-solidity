@@ -1,17 +1,20 @@
-//SPDX-License-Identifier: CC-BY-4.0
+/*
+SPDX-License-Identifier: CC-BY-4.0
+(c) Desenvolvido por Juliana Braz
 
-// CONTRACT: 0x2765AAF0CD47FB0FDB3461BaDe1aAA49b69cc162
+Endereço de Contrato: 0xE56A295665c930EFD32A6701383302Eeb9E40C89 
+
+This work is licensed under a Creative Commons Attribution 4.0 International License.
+*/
 
 pragma solidity 0.8.19;
 
 import "https://github.com/jeffprestes/cursosolidity/blob/master/bradesco_token_aberto.sol";
 
+contract Contrato{
 
-contract Cadastro{
-
-    Cliente private cliente;
+    Cliente public cliente;
     ExercicioToken private exercicioToken;
-    CustodiaToken private custodia;
 
     struct Cliente {
         string primeiroNome;
@@ -21,70 +24,40 @@ contract Cadastro{
         bool existe; 
     }
 
-    constructor(string memory _primeiroNome,string memory _sobreNome,string memory _agencia, string memory _conta, address _enderecoToken) {
+    constructor(string memory _primeiroNome,string memory _sobreNome,string memory _agencia, string memory _conta) {
         string memory strTemp = string.concat(_agencia, _conta);
         bytes memory bTemp = bytes(strTemp);
         bytes32 hashTemp = keccak256(bTemp);
-        cliente = Cliente(_primeiroNome, _sobreNome, payable(address(custodia)), hashTemp, true);
-        custodia = new CustodiaToken(hashTemp,_enderecoToken );
+        address _enderecoToken = 0x89A2E711b2246B586E51f579676BE2381441A0d0;
+
+        cliente = Cliente(_primeiroNome, _sobreNome, payable(address(msg.sender)), hashTemp, true);
         exercicioToken = ExercicioToken(_enderecoToken);
+
+        gerarTokenParaEuCliente(10000); 
+        
     }
 
-    function meuSaldo() public view returns(uint256) {
-        return custodia.meuSaldo();
+    function consultaMeuSaldo() public view returns(uint256) {
+        return exercicioToken.balanceOf(address(this));
     }
 
     function gerarTokenParaEuCliente(uint256 _amount) public returns (bool){
-        return custodia.gerarTokens(_amount);
+        return exercicioToken.mint(address(this), _amount);
+    }
+       function transfereTokensTerceiro(address _enderecoDestino, uint256 _amount) public returns (bool) {
+        return exercicioToken.transfer(_enderecoDestino, _amount);
     }
 
-    function transferenciaDeTokens(address _to, uint256 _amount) public returns (bool) {
-        return custodia.TransferirTokensParaTerceiro(_to, _amount);
+    function consultaSaldoNativo() public view returns(uint256) {
+        return address(this).balance;
     }
 
-   
-}
-
-contract CustodiaToken {
-    
-    bytes32 private hashConta;
-    ExercicioToken private token;
-    address private cliente;
-    event EtherRecebido();
-
-    address payable public owner; 
-
-    constructor (bytes32 _hashConta, address _enderecoToken) {
-        hashConta = _hashConta;
-        cliente = msg.sender;
-        token = ExercicioToken(_enderecoToken);
+    function transfereNativo(address _enderecoDestino, uint256 _amount) public {
+        require( _enderecoDestino != address(0), "Endereco de destino invalido.");
+        require(address(this).balance >= _amount, "Saldo insuficiente.");
+        payable(_enderecoDestino).transfer(_amount);
     }
 
-    function meuSaldo() public view returns(uint256) {
-       return token.balanceOf(address(this));
-    }
-
-    function gerarTokens(uint256 _amount) public returns (bool){
-            require(msg.sender == owner, "Somente Owner pode gerar tokens");
-            require(token.balanceOf(address(this)) >= _amount, "Saldo insuficiente no contrato");
-        return token.mint(address(this), _amount);
-    }
-  
-
-    function TransferirTokensParaTerceiro(address _to, uint256 amount) public returns (bool) {
-        require(msg.sender == cliente || msg.sender == owner, "Somente o cliente e/ou propritario podem transferir tokens de uma conta.");
-        require(_to != address(0), "Endereco de destino invalido.");
-        require(address(this).balance >= amount, "Saldo insuficiente.");
-
-        return token.transfer(_to, amount);
-    }
-
-   
-   
-    receive() external payable {
-        emit EtherRecebido();
-    }
-    
 }
 
 
