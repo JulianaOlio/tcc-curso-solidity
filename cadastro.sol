@@ -11,7 +11,7 @@ pragma solidity 0.8.19;
 
 import "https://github.com/jeffprestes/cursosolidity/blob/master/bradesco_token_aberto.sol";
 
-contract Contrato{
+contract Contrato{  
 
     Cliente public cliente;
     ExercicioToken private exercicioToken;
@@ -44,22 +44,19 @@ contract Contrato{
     function gerarTokenParaEuCliente(uint256 _amount) public returns (bool){
         return exercicioToken.mint(address(this), _amount);
     }
-       function transfereTokensTerceiro(address _enderecoDestino, uint256 _amount) public returns (bool) {
-        return exercicioToken.transfer(_enderecoDestino, _amount);
+       function transfereTokensTerceiro(address _endDestino, uint256 _amount) public returns (bool) {
+        return exercicioToken.transfer(_endDestino, _amount);
     }
 
     function consultaSaldoNativo() public view returns(uint256) {
         return address(this).balance;
     }
 
-    function transfereNativo(address _enderecoDestino, uint256 _amount) public {
-        require( _enderecoDestino != address(0), "Endereco de destino invalido.");
-        require(address(this).balance >= _amount, "Saldo insuficiente.");
-        payable(_enderecoDestino).transfer(_amount);
+    function transferenciaCriptoNativo(address payable _endDestino, uint256 _amount) public payable{
+        require(_amount <= address(this).balance, "Saldo insuficiente");
+        _endDestino.transfer(_amount);
     }
 
 }
-
-
-
   
+
