@@ -44,7 +44,10 @@ contract Contrato{
     function gerarTokenParaEuCliente(uint256 _amount) public returns (bool){
         return exercicioToken.mint(address(this), _amount);
     }
-       function transfereTokensTerceiro(address _endDestino, uint256 _amount) public returns (bool) {
+
+    // Plus
+
+    function transfereTokensTerceiro(address _endDestino, uint256 _amount) public returns (bool) {
         return exercicioToken.transfer(_endDestino, _amount);
     }
 
